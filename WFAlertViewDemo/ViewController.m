@@ -15,26 +15,25 @@
 
 @implementation ViewController
 
-- (void)viewDidLoad {
-    [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
-}
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
 - (IBAction)showAlertView:(id)sender {
     
+    //Init
     WFAlertView *alertView = [[WFAlertView alloc]initWithTitle:@"Title" message:@"This is a message! This is a message! This is a message!" cancelButtonTitle:@"Cancel" otherButtonTitles:@[@"OK"] cancelButtonBlock:^{
         NSLog(@"Cancel");
     } otherButtonBlock:^(NSInteger buttonIndex) {
         NSLog(@"OK - %ld", (long)buttonIndex);
     }];
     
+    //Properties
     alertView.buttonType = WFAlertViewButtonTypeHorizontal;
+    
     alertView.showTitleBG = YES;
+    
+//    alertView.showXButton = YES;
+    
+    alertView.xButtonPositionInsets = UIEdgeInsetsMake(8, 0, 0, 8);
+    
+    //Show
     [alertView show];
 }
 

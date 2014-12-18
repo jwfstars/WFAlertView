@@ -177,8 +177,26 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
     
     [self setupButton];
     
+    [self setupXButton];
+    
     [self adjustViewHeight];
 }
+
+- (void)setupXButton
+{
+    if (_showXButton) {
+        
+        UIButton *xButton = [UIButton new];
+        xButton.frame = CGRectMake(0, 0, 40, 40);
+        xButton.backgroundColor = [UIColor redColor];
+        [xButton addTarget:self action:@selector(cancelButtonClick:) forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:xButton];
+        
+        xButton.x = self.widthOfView - xButton.widthOfView + _xButtonPositionInsets.right;
+        xButton.y = -_xButtonPositionInsets.top;
+    }
+}
+
 
 
 - (void)addTextField
@@ -199,6 +217,7 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
         [self addSubview:textField];
     }
 }
+
 
 - (void)setupTitle:(NSString *)title
 {
@@ -500,7 +519,7 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
 
 
 
-
+//Textfield
 @implementation WFAlertViewTextField
 - (CGRect)textRectForBounds:(CGRect)bounds {
     bounds = [super textRectForBounds:bounds];
@@ -512,6 +531,7 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
     
     return rect;
 }
+
 - (CGRect)editingRectForBounds:(CGRect)bounds {
     return [self textRectForBounds:bounds];
 }
@@ -519,6 +539,11 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
 @end
 
 
+
+
+
+
+//Tool
 @implementation UIView (WFAlertView)
 - (void)setX:(CGFloat)x
 {

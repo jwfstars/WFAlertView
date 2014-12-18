@@ -51,8 +51,9 @@ typedef NS_ENUM(NSInteger, WFAlertViewButtonType)
 @property (assign, nonatomic) NSTextAlignment messageTextAlignment;
 //TitltBG
 @property (assign, nonatomic) BOOL showTitleBG;
-
-
+//"X"button
+@property (assign, nonatomic) BOOL showXButton;
+@property (assign, nonatomic) UIEdgeInsets xButtonPositionInsets; // right and top insets
 
 - (instancetype)initWithTitle:(NSString *)title
                       message:(NSString *)message
