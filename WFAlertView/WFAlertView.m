@@ -9,7 +9,7 @@
 #import "WFAlertView.h"
 
 #define kMargin 15
-#define kTopMargin 25
+#define kTopMargin 10
 #define kLeftRightMargin 20
 #define kBottomMargin 20
 #define kViewCornerRadius 1
@@ -18,20 +18,26 @@
 #define kTextFieldLeftInset 10
 #define kTextFieldBorderWidth 0.5
 
+
+
 //Default UI
 #define WFColorWithRGBA(r, g, b, a) [UIColor colorWithRed:(r)/255.0 green:(g)/255.0 blue:(b)/255.0 alpha:(a)]
 #define kBackgroundColor [UIColor whiteColor]//WFColorWithRGBA(255, 255, 255, 1)
-#define kCancelButtonColor WFColorWithRGBA(150, 150, 150, 1)
-#define kOtherButtonColor WFColorWithRGBA(133, 206, 87, 1)
-#define kTitleColor         WFColorWithRGBA(50, 50, 50, 1)
-#define kMessageColor       WFColorWithRGBA(50, 50, 50, 1)
+#define kCancelButtonColor WFColorWithRGBA(119, 137, 144, 1)
+#define kOtherButtonColor WFColorWithRGBA(206, 80, 81, 1)
+#define kTitleColor         WFColorWithRGBA(87, 95, 97, 1)
+#define kMessageColor       WFColorWithRGBA(168, 176, 178, 1)
+#define kTitleBGViewColor WFColorWithRGBA(249, 249, 249, 1)
+#define kTitleBGLineColor WFColorWithRGBA(212, 213, 215, 1)
 
-#define kTitleFontSize 16
+#define kTitleFontSize 22
 #define kMessageFontSize 16
+#define kCancelButtonFontSize 16
+#define kOtherButtonFontSize 16
 #define kTitleFont                    [UIFont fontWithName:@"HelveticaNeue-Bold" size:kTitleFontSize]
 #define kMessageFont                [UIFont fontWithName:@"Helvetica" size:kMessageFontSize]
-#define kCancelButtonFont                    [UIFont fontWithName:@"Helvetica" size:kTitleFontSize]
-#define kOtherButtonFont                [UIFont fontWithName:@"Helvetica" size:kMessageFontSize]
+#define kCancelButtonFont                    [UIFont fontWithName:@"Helvetica" size:kCancelButtonFontSize]
+#define kOtherButtonFont                [UIFont fontWithName:@"Helvetica" size:kOtherButtonFontSize]
 
 #define kAnimationSpringLevel 0.5f
 #define kAnimationDuration 0.5f
@@ -119,6 +125,8 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
     _cancelButtonColor = kCancelButtonColor;
     _otherButtonColor = kOtherButtonColor;
     _textFieldTextColor = kMessageColor;
+    _titleBGViewColor = kTitleBGViewColor;
+    
     
     _titleFont = kTitleFont;
     _messageFont = kMessageFont;
@@ -196,6 +204,9 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
 {
     if (_titleLabel == nil && title.length) {
         
+        
+        
+        
         UILabel *titleLabel = [UILabel new];
         titleLabel.text = title;
         titleLabel.font = _titleFont;
@@ -204,7 +215,23 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
         titleLabel.frame = titleRect;
         titleLabel.centerX = self.frame.size.width/2;
         titleLabel.y = kTopMargin;
-        _titleLabel = titleLabel;
+        
+        if (_showTitleBG) {
+            UIView *titleView = [UIView new];
+            [self addSubview:titleView];
+            titleView.backgroundColor = _titleBGViewColor;
+            titleView.frame = CGRectMake(0, 0, self.widthOfView, 0);
+            
+            UIView *line = [UIView new];
+            line.backgroundColor = kTitleBGLineColor;
+            line.frame = CGRectMake(0, 0, self.widthOfView, 0.5);
+            [titleView addSubview:line];
+            
+            titleView.heightOfView = titleRect.size.height + kTopMargin * 2;
+            line.y = titleView.size.height - 0.5;
+        }
+        
+            _titleLabel = titleLabel;
         [self addSubview:titleLabel];
     }
 }
@@ -228,7 +255,11 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
         if (_titleLabel == nil) {
             messageLabel.y = kTopMargin;
         }else {
-            messageLabel.y = CGRectGetMaxY(_titleLabel.frame) + kMargin;
+            if (_showTitleBG) {
+                messageLabel.y = CGRectGetMaxY(_titleLabel.frame) + kMargin*1.5;
+            }else {
+                messageLabel.y = CGRectGetMaxY(_titleLabel.frame) + kMargin;
+            }
         }
         
         _messageLabel = messageLabel;

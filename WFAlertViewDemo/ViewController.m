@@ -34,8 +34,7 @@
     }];
     
     alertView.buttonType = WFAlertViewButtonTypeHorizontal;
-    alertView.titleFont = [UIFont systemFontOfSize:30];
-    
+    alertView.showTitleBG = YES;
     [alertView show];
 }
 
