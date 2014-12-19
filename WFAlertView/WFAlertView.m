@@ -168,9 +168,7 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
     _buttonVerticalMargin = kMargin;
     
     
-    //other
-    self.backgroundColor = _backgroundViewColor;
-    self.layer.cornerRadius = _viewCornerRadius;
+
 }
 
 
@@ -199,6 +197,8 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
 
 - (void)layoutSubviews
 {
+    [self setupView];
+    
     [self setupTitle:_title];
     
     [self setupMessage:_message];
@@ -212,6 +212,12 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
     [self setupXButton];
     
     [self adjustViewHeight];
+}
+
+- (void)setupView
+{
+    self.backgroundColor = _backgroundViewColor;
+    self.layer.cornerRadius = _viewCornerRadius;
 }
 
 - (void)setupXButton
