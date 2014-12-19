@@ -12,9 +12,7 @@
 #define kTopMargin 10
 #define kLeftRightMargin 20
 #define kBottomMargin 20
-#define kViewCornerRadius 1
-#define kButtonCornerRadius 1
-#define kButtonHeight 45
+
 #define kTextFieldLeftInset 10
 #define kTextFieldBorderWidth 0.5
 
@@ -44,6 +42,11 @@
 
 #define kAlertViewWidth 300
 #define kAlertViewHeight 200
+
+#define kViewCornerRadius 1
+#define kButtonCornerRadius 1
+#define kButtonHeight 45
+
 
 @interface UIView(WFAlertView)
 @property (assign, nonatomic) CGFloat x;
@@ -93,6 +96,15 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
 
 
 @property (assign, nonatomic) WFAlertViewType type;
+
+
+
+//margin
+@property (assign, nonatomic) CGFloat leftMargin;
+@property (assign, nonatomic) CGFloat rightMargin;
+@property (assign, nonatomic) CGFloat topMargin;
+@property (assign, nonatomic) CGFloat bottomMargin;
+
 @end
 
 @implementation WFAlertView
@@ -146,11 +158,31 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
     
     _messageTextAlignment = NSTextAlignmentCenter;
 
+    _viewCornerRadius = kViewCornerRadius;
+    _buttonCornerRadius = kButtonCornerRadius;
+    
+    _marginInsets = UIEdgeInsetsMake(kTopMargin, kLeftRightMargin, kBottomMargin, kLeftRightMargin);
+    _title2messageMargin = kMargin;
+    _message2ButtonMargin = kMargin;
+    _buttonHorizontalMargin = kMargin;
+    _buttonVerticalMargin = kMargin;
+    
+    
     //other
     self.backgroundColor = _backgroundViewColor;
-    self.layer.cornerRadius = kViewCornerRadius;
+    self.layer.cornerRadius = _viewCornerRadius;
 }
 
+
+- (void)setMargin:(UIEdgeInsets)margin
+{
+    _marginInsets = margin;
+    
+    _leftMargin = margin.left;
+    _rightMargin = margin.right;
+    _topMargin = margin.top;
+    _bottomMargin = margin.bottom;
+}
 
 - (instancetype)initWithTitle:(NSString *)title message:(NSString *)message textFieldMessage:(NSString *)textFieldMessage textFieldValue:(NSString *)textFieldValue cancelButtonTitle:(NSString *)cancelButtonTitle otherButtonTitles:(NSArray *)otherButtonTitles cancelButtonBlock:(WFAlertViewCancelBlock)cancelButtonBlock textFieldBlock:(WFAlertViewTextFieldBlock)textFieldBlock
 {
@@ -204,7 +236,7 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
     if (_textField == nil) {
         WFAlertViewTextField *textField = [WFAlertViewTextField new];
         CGFloat textFieldY = [self messageMaxY] + kMargin;
-        textField.frame = CGRectMake(kLeftRightMargin, textFieldY, self.widthOfView - 2*kLeftRightMargin, _textFieldHeight);
+        textField.frame = CGRectMake(_marginInsets.left, textFieldY, self.widthOfView - _marginInsets.left - _marginInsets.right, _textFieldHeight);
         textField.layer.borderWidth = _textFieldBorderWidth;
         textField.layer.borderColor = [_textFieldBorderColor CGColor];
         textField.placeholder = _textFieldMessage;
@@ -230,10 +262,10 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
         titleLabel.text = title;
         titleLabel.font = _titleFont;
         titleLabel.textColor = _titleColor;
-        CGRect titleRect = [title boundingRectWithSize:CGSizeMake(self.frame.size.width - 2 * kLeftRightMargin, MAXFLOAT) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName : _titleFont} context:0];
+        CGRect titleRect = [title boundingRectWithSize:CGSizeMake(self.widthOfView - _marginInsets.left - _marginInsets.right, MAXFLOAT) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName : _titleFont} context:0];
         titleLabel.frame = titleRect;
         titleLabel.centerX = self.frame.size.width/2;
-        titleLabel.y = kTopMargin;
+        titleLabel.y = _marginInsets.top;
         
         if (_showTitleBG) {
             UIView *titleView = [UIView new];
@@ -246,7 +278,7 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
             line.frame = CGRectMake(0, 0, self.widthOfView, 0.5);
             [titleView addSubview:line];
             
-            titleView.heightOfView = titleRect.size.height + kTopMargin * 2;
+            titleView.heightOfView = titleRect.size.height + _marginInsets.top + _title2messageMargin;
             line.y = titleView.size.height - 0.5;
         }
         
@@ -267,17 +299,17 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
         messageLabel.numberOfLines = 0;
         messageLabel.lineBreakMode = NSLineBreakByWordWrapping;
         messageLabel.textAlignment = _messageTextAlignment;
-        CGRect messageRect = [message boundingRectWithSize:CGSizeMake(self.widthOfView - 2 * kLeftRightMargin, MAXFLOAT) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName : _messageFont} context:0];
-        messageLabel.frame = CGRectMake(kLeftRightMargin, 0, self.widthOfView - 2 * kLeftRightMargin, messageRect.size.height);
+        CGRect messageRect = [message boundingRectWithSize:CGSizeMake(self.widthOfView - _marginInsets.left - _marginInsets.right, MAXFLOAT) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName : _messageFont} context:0];
+        messageLabel.frame = CGRectMake(_marginInsets.left, 0, self.widthOfView - _marginInsets.left - _marginInsets.right, messageRect.size.height);
         messageLabel.centerX = self.frame.size.width/2;
         
         if (_titleLabel == nil) {
-            messageLabel.y = kTopMargin;
+            messageLabel.y = _marginInsets.top;
         }else {
             if (_showTitleBG) {
-                messageLabel.y = CGRectGetMaxY(_titleLabel.frame) + kMargin*1.5;
+                messageLabel.y = CGRectGetMaxY(_titleLabel.frame) + _title2messageMargin + kMargin/2;
             }else {
-                messageLabel.y = CGRectGetMaxY(_titleLabel.frame) + kMargin;
+                messageLabel.y = CGRectGetMaxY(_titleLabel.frame) + _title2messageMargin;
             }
         }
         
@@ -321,15 +353,15 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
         UIButton *cancelButton = [UIButton new];
         cancelButton.backgroundColor = _cancelButtonColor;
         cancelButton.tag = -1;
-        cancelButton.layer.cornerRadius = kButtonCornerRadius;
+        cancelButton.layer.cornerRadius = _buttonCornerRadius;
         [cancelButton setTitle:_cancelButtonTitle forState:UIControlStateNormal];
         cancelButton.titleLabel.font = _cancelButtonFont;
         [cancelButton addTarget:self action:@selector(cancelButtonClick:) forControlEvents:UIControlEventTouchUpInside];
         _cancelButton = cancelButton;
         [self addSubview:cancelButton];
         
-        CGFloat buttonY = [self messageMaxY] + kMargin;
-        cancelButton.frame = CGRectMake(kLeftRightMargin, buttonY, self.widthOfView - 2 * kLeftRightMargin, _buttonHeight);
+        CGFloat buttonY = [self messageMaxY] + _message2ButtonMargin;
+        cancelButton.frame = CGRectMake(_marginInsets.left, buttonY, self.widthOfView - _marginInsets.left - _marginInsets.right, _buttonHeight);
     }
 }
 
@@ -350,7 +382,7 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
             UIButton *otherButton = [UIButton new];
             otherButton.backgroundColor = _otherButtonColor;
             otherButton.titleLabel.font = _otherButtonFont;
-            otherButton.layer.cornerRadius = kButtonCornerRadius;
+            otherButton.layer.cornerRadius = _buttonCornerRadius;
             otherButton.tag = i;
             [otherButton setTitle:otherTitle forState:UIControlStateNormal];
             [otherButton addTarget:self action:@selector(otherButtonClick:) forControlEvents:UIControlEventTouchUpInside];
@@ -368,16 +400,16 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
                 
                 if (_cancelButton && _otherButtonTitles.count == 1) {
                     //水平排列
-                    CGFloat buttonW = (self.widthOfView - 2*kLeftRightMargin - kMargin)/2;
-                    CGFloat rightX = kLeftRightMargin + buttonW + kMargin;
-                    _cancelButton.frame = CGRectMake(kLeftRightMargin, _cancelButton.y, buttonW, _buttonHeight);
+                    CGFloat buttonW = (self.widthOfView - _marginInsets.left - _marginInsets.right - _buttonHorizontalMargin)/2;
+                    CGFloat rightX = _marginInsets.left + buttonW + _buttonHorizontalMargin;
+                    _cancelButton.frame = CGRectMake(_marginInsets.left, _cancelButton.y, buttonW, _buttonHeight);
                     otherButton.frame = CGRectMake(rightX, _cancelButton.y, buttonW, _buttonHeight);
                     
                 }else if (_cancelButton == nil && _otherButtonTitles.count == 2) {
                     //水平排列
-                    CGFloat buttonW = (self.widthOfView - 2*kLeftRightMargin - kMargin)/2;
-                    CGFloat buttonX = kLeftRightMargin + i*(buttonW + kMargin);
-                    CGFloat buttonY = [self messageMaxY] + kMargin;
+                    CGFloat buttonW = (self.widthOfView - _marginInsets.left - _marginInsets.right - _buttonHorizontalMargin)/2;
+                    CGFloat buttonX = _marginInsets.left + i*(buttonW + _buttonHorizontalMargin);
+                    CGFloat buttonY = [self messageMaxY] + _message2ButtonMargin;
                     otherButton.frame = CGRectMake(buttonX, buttonY, buttonW, _buttonHeight);
                 }else {
                     //超过两个按钮,转换为竖直排列
@@ -389,13 +421,13 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
             }else {
                 CGFloat buttonY;
                 if (_cancelButtonTitle) {
-                    buttonY = [self messageMaxY] + kMargin + i*(kMargin + _buttonHeight);
-                    CGFloat cancelButtonY = buttonY + (kMargin + _buttonHeight);
-                    _cancelButton.frame = CGRectMake(kLeftRightMargin, cancelButtonY, self.widthOfView - 2 * kLeftRightMargin, _buttonHeight);
+                    buttonY = [self messageMaxY] + _message2ButtonMargin + i*(_buttonVerticalMargin + _buttonHeight);
+                    CGFloat cancelButtonY = buttonY + (_buttonVerticalMargin + _buttonHeight);
+                    _cancelButton.frame = CGRectMake(_marginInsets.left, cancelButtonY, self.widthOfView - _marginInsets.left - _marginInsets.right, _buttonHeight);
                 }else {
-                    buttonY = [self messageMaxY] + kMargin + i*(kMargin + _buttonHeight);
+                    buttonY = [self messageMaxY] + _message2ButtonMargin + i*(_buttonVerticalMargin + _buttonHeight);
                 }
-                otherButton.frame = CGRectMake(kLeftRightMargin, buttonY, self.widthOfView - 2 * kLeftRightMargin, _buttonHeight);
+                otherButton.frame = CGRectMake(_marginInsets.left, buttonY, self.widthOfView - _marginInsets.left - _marginInsets.right, _buttonHeight);
             }
         }
     }
@@ -443,7 +475,7 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
             height = [self messageMaxY];
         }
     }
-    self.heightOfView =  height + kBottomMargin;
+    self.heightOfView =  height + _marginInsets.bottom;
     self.widthOfView = _alertViewWidth;
     
     self.center = _window.center;

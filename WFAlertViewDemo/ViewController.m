@@ -29,10 +29,13 @@
     
     alertView.showTitleBG = YES;
     
-//    alertView.showXButton = YES;
-    
     alertView.xButtonPositionInsets = UIEdgeInsetsMake(8, 0, 0, 8);
     
+    alertView.marginInsets = UIEdgeInsetsMake(10, 10, 10, 10);
+//    alertView.title2messageMargin = 50;
+    alertView.message2ButtonMargin = 50;
+    alertView.buttonHorizontalMargin = 1;
+    alertView.buttonVerticalMargin = 6;
     //Show
     [alertView show];
 }

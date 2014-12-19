@@ -39,11 +39,14 @@ typedef NS_ENUM(NSInteger, WFAlertViewButtonType)
 //Animation
 @property (assign, nonatomic) CGFloat  animationDuration;
 @property (assign, nonatomic) CGFloat  animationSpringLevel;
-//View Width
+//View
 @property (assign, nonatomic) CGFloat  alertViewWidth;
+@property (assign, nonatomic) CGFloat  viewCornerRadius;
 //Button Type(排列方式)
 @property (assign, nonatomic) CGFloat  buttonHeight;
 @property (assign, nonatomic) WFAlertViewButtonType buttonType;
+@property (assign, nonatomic) CGFloat  buttonCornerRadius;
+
 //TextField
 @property (assign, nonatomic) CGFloat  textFieldBorderWidth;
 @property (assign, nonatomic) CGFloat  textFieldHeight;
@@ -54,6 +57,14 @@ typedef NS_ENUM(NSInteger, WFAlertViewButtonType)
 //"X"button
 @property (assign, nonatomic) BOOL showXButton;
 @property (assign, nonatomic) UIEdgeInsets xButtonPositionInsets; // right and top insets
+//Margin
+@property (assign, nonatomic) UIEdgeInsets marginInsets;
+@property (assign, nonatomic) CGFloat title2messageMargin;
+@property (assign, nonatomic) CGFloat message2ButtonMargin;
+@property (assign, nonatomic) CGFloat buttonVerticalMargin;
+@property (assign, nonatomic) CGFloat buttonHorizontalMargin;
+
+
 
 - (instancetype)initWithTitle:(NSString *)title
                       message:(NSString *)message
