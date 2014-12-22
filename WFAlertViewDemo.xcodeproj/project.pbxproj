@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		33D58C2A1A47DCFF0030DEA2 /* AGWindowView.m in Sources */ = {isa = PBXBuildFile; fileRef = 33D58C261A47DCFF0030DEA2 /* AGWindowView.m */; };
+		33D58C2B1A47DCFF0030DEA2 /* UIView+WF.m in Sources */ = {isa = PBXBuildFile; fileRef = 33D58C291A47DCFF0030DEA2 /* UIView+WF.m */; };
 		33E80EF81A412D4E00EBAC9B /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 33E80EF71A412D4E00EBAC9B /* main.m */; };
 		33E80EFB1A412D4E00EBAC9B /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 33E80EFA1A412D4E00EBAC9B /* AppDelegate.m */; };
 		33E80EFE1A412D4E00EBAC9B /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 33E80EFD1A412D4E00EBAC9B /* ViewController.m */; };
@@ -28,6 +30,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		33D58C251A47DCFF0030DEA2 /* AGWindowView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AGWindowView.h; sourceTree = "<group>"; };
+		33D58C261A47DCFF0030DEA2 /* AGWindowView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AGWindowView.m; sourceTree = "<group>"; };
+		33D58C271A47DCFF0030DEA2 /* AGWindowViewDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AGWindowViewDefines.h; sourceTree = "<group>"; };
+		33D58C281A47DCFF0030DEA2 /* UIView+WF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+WF.h"; sourceTree = "<group>"; };
+		33D58C291A47DCFF0030DEA2 /* UIView+WF.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+WF.m"; sourceTree = "<group>"; };
 		33E80EF21A412D4E00EBAC9B /* WFAlertViewDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WFAlertViewDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		33E80EF61A412D4E00EBAC9B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		33E80EF71A412D4E00EBAC9B /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -63,6 +70,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		33D58C241A47DCFF0030DEA2 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				33D58C251A47DCFF0030DEA2 /* AGWindowView.h */,
+				33D58C261A47DCFF0030DEA2 /* AGWindowView.m */,
+				33D58C271A47DCFF0030DEA2 /* AGWindowViewDefines.h */,
+				33D58C281A47DCFF0030DEA2 /* UIView+WF.h */,
+				33D58C291A47DCFF0030DEA2 /* UIView+WF.m */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
 		33E80EE91A412D4E00EBAC9B = {
 			isa = PBXGroup;
 			children = (
@@ -126,6 +145,7 @@
 		33E80F231A412DDB00EBAC9B /* WFAlertView */ = {
 			isa = PBXGroup;
 			children = (
+				33D58C241A47DCFF0030DEA2 /* lib */,
 				33E80F241A412DDB00EBAC9B /* WFAlertView.h */,
 				33E80F251A412DDB00EBAC9B /* WFAlertView.m */,
 			);
@@ -232,6 +252,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				33D58C2A1A47DCFF0030DEA2 /* AGWindowView.m in Sources */,
+				33D58C2B1A47DCFF0030DEA2 /* UIView+WF.m in Sources */,
 				33E80F261A412DDB00EBAC9B /* WFAlertView.m in Sources */,
 				33E80EFE1A412D4E00EBAC9B /* ViewController.m in Sources */,
 				33E80EFB1A412D4E00EBAC9B /* AppDelegate.m in Sources */,
@@ -358,6 +380,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = WFAlertViewDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -368,6 +391,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = WFAlertViewDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -426,6 +450,7 @@
 				33E80F171A412D4E00EBAC9B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		33E80F181A412D4E00EBAC9B /* Build configuration list for PBXNativeTarget "WFAlertViewDemoTests" */ = {
 			isa = XCConfigurationList;
@@ -434,6 +459,7 @@
 				33E80F1A1A412D4E00EBAC9B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

@@ -7,6 +7,15 @@
 //
 
 #import "WFAlertView.h"
+#import "UIView+WF.h"
+
+#import "AGWindowView.h"
+
+#define iPad (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+#define iOS8 [[[UIDevice currentDevice]systemVersion] floatValue] >= 8.0
+
+
+
 
 #define kMargin 15
 #define kTopMargin 10
@@ -48,17 +57,6 @@
 #define kButtonHeight 45
 
 
-@interface UIView(WFAlertView)
-@property (assign, nonatomic) CGFloat x;
-@property (assign, nonatomic) CGFloat y;
-@property (assign, nonatomic) CGFloat widthOfView;
-@property (assign, nonatomic) CGFloat heightOfView;
-@property (assign, nonatomic) CGSize size;
-@property (assign, nonatomic) CGPoint origin;
-@property (assign, nonatomic) CGFloat centerX;
-@property (assign, nonatomic) CGFloat centerY;
-@end
-
 @interface WFAlertViewTextField : UITextField
 @property (assign, nonatomic) UIEdgeInsets textContainerInset;
 @end
@@ -77,7 +75,11 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
 @property (copy, nonatomic) WFAlertViewOtherBlock otherButtonBlock;
 @property (copy, nonatomic) WFAlertViewTextFieldBlock textFieldBlock;
 
-@property (strong, nonatomic) UIView *cover;
+@property (weak, nonatomic) UIView *bgView;
+
+@property (weak, nonatomic) UIView *cover;
+@property (weak, nonatomic) UIView *window;
+
 @property (copy, nonatomic) NSString *title;
 @property (copy, nonatomic) NSString *message;
 @property (copy, nonatomic) NSString *textFieldMessage;
@@ -90,7 +92,6 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
 @property (weak, nonatomic) UIButton *lastButton;
 @property (strong, nonatomic) NSMutableArray *otherButtons;
 
-@property (weak, nonatomic) UIWindow *window;
 @property (weak, nonatomic) WFAlertViewTextField *textField;
 
 
@@ -105,38 +106,93 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
 @property (assign, nonatomic) CGFloat topMargin;
 @property (assign, nonatomic) CGFloat bottomMargin;
 
-@end
+//ios7
+@property (assign, nonatomic) CGFloat windowMax;
+@property (assign, nonatomic) CGFloat windowMin;
 
+@end
+static WFAlertView *sharedInstance;
 @implementation WFAlertView
 
-- (instancetype)initWithTitle:(NSString *)title message:(NSString *)message cancelButtonTitle:(NSString *)cancelButtonTitle otherButtonTitles:(NSArray *)otherButtonTitles cancelButtonBlock:(WFAlertViewCancelBlock)cancelButtonBlock otherButtonBlock:(WFAlertViewOtherBlock)otherButtonBlock
-{
-    if (self = [super initWithFrame:CGRectMake(0, 0, kAlertViewWidth, kAlertViewHeight)] ) {
-        
-        NSAssert(title != nil || message != nil, @"Title or message must be non-nil");
-        _title = title;
-        _message = message;
-        
-        NSAssert(cancelButtonTitle != nil || otherButtonTitles.count, @"Alert view must have a button");
-        _cancelButtonTitle = cancelButtonTitle;
-        _otherButtonTitles = otherButtonTitles;
-        _cancelButtonBlock = cancelButtonBlock;
-        _otherButtonBlock = otherButtonBlock;
 
++ (WFAlertView *)alertView
+{
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [[WFAlertView alloc]init];
+    });
+    
+    return sharedInstance;
+}
++ (instancetype)allocWithZone:(struct _NSZone *)zone
+{
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [super allocWithZone:zone];
+    });
+    return sharedInstance;
+}
++ (WFAlertView *)appearence
+{
+    return [WFAlertView alertView];
+}
+- (instancetype)init
+{
+    self = [super init];
+    if (self) {
         [self setupDefaultUIProperty];
     }
     return self;
 }
-- (instancetype)initWithTitle:(NSString *)title message:(NSString *)message textFieldMessage:(NSString *)textFieldMessage textFieldValue:(NSString *)textFieldValue cancelButtonTitle:(NSString *)cancelButtonTitle otherButtonTitles:(NSArray *)otherButtonTitles cancelButtonBlock:(WFAlertViewCancelBlock)cancelButtonBlock textFieldBlock:(WFAlertViewTextFieldBlock)textFieldBlock
+
+
+
+
+
++ (void)showAlertWithTitle:(NSString *)title message:(NSString *)message cancelButtonTitle:(NSString *)cancelButtonTitle otherButtonTitles:(NSArray *)otherButtonTitles cancelButtonBlock:(WFAlertViewCancelBlock)cancelButtonBlock otherButtonBlock:(WFAlertViewOtherBlock)otherButtonBlock
 {
-    _textFieldBlock = textFieldBlock;
-    _type = WFAlertViewTypeTextField;
+    WFAlertView *alertView = [WFAlertView alertView];
     
-    _textFieldMessage = textFieldMessage;
-    _textFieldValue = textFieldValue;
+    NSAssert(title != nil || message != nil, @"Title or message must be non-nil");
+    alertView.title = title;
+    alertView.message = message;
     
-    return [self initWithTitle:title message:message cancelButtonTitle:cancelButtonTitle otherButtonTitles:otherButtonTitles cancelButtonBlock:cancelButtonBlock otherButtonBlock:nil];
+    NSAssert(cancelButtonTitle != nil || otherButtonTitles.count, @"Alert view must have a button");
+    alertView.cancelButtonTitle = cancelButtonTitle;
+    alertView.otherButtonTitles = otherButtonTitles;
+    alertView.cancelButtonBlock = cancelButtonBlock;
+    alertView.otherButtonBlock = otherButtonBlock;
+    
+    
+    [alertView show];
 }
+
+
+
++ (void)showAlertWithTitle:(NSString *)title message:(NSString *)message textFieldMessage:(NSString *)textFieldMessage textFieldValue:(NSString *)textFieldValue cancelButtonTitle:(NSString *)cancelButtonTitle otherButtonTitles:(NSArray *)otherButtonTitles cancelButtonBlock:(WFAlertViewCancelBlock)cancelButtonBlock textFieldBlock:(WFAlertViewTextFieldBlock)textFieldBlock
+{
+    WFAlertView *alertView = [WFAlertView alertView];
+
+    NSAssert(title != nil || message != nil, @"Title or message must be non-nil");
+    alertView.title = title;
+    alertView.message = message;
+    
+    NSAssert(cancelButtonTitle != nil || otherButtonTitles.count, @"Alert view must have a button");
+    alertView.cancelButtonTitle = cancelButtonTitle;
+    alertView.otherButtonTitles = otherButtonTitles;
+    alertView.cancelButtonBlock = cancelButtonBlock;
+    
+    alertView.textFieldBlock = textFieldBlock;
+    alertView.type = WFAlertViewTypeTextField;
+    
+    alertView.textFieldMessage = textFieldMessage;
+    alertView.textFieldValue = textFieldValue;
+
+    [alertView show];
+}
+
+
+
 
 - (void)setupDefaultUIProperty
 {
@@ -193,32 +249,13 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
 }
 
 
-//- (void)setTintColor:(UIColor *)tintColor{}
 
 - (void)layoutSubviews
 {
-    [self setupView];
     
-    [self setupTitle:_title];
-    
-    [self setupMessage:_message];
-    
-    if (self.type == WFAlertViewTypeTextField) {
-        [self addTextField];
-    }
-    
-    [self setupButton];
-    
-    [self setupXButton];
-    
-    [self adjustViewHeight];
 }
 
-- (void)setupView
-{
-    self.backgroundColor = _backgroundViewColor;
-    self.layer.cornerRadius = _viewCornerRadius;
-}
+
 
 - (void)setupXButton
 {
@@ -228,9 +265,9 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
         xButton.frame = CGRectMake(0, 0, 40, 40);
         xButton.backgroundColor = [UIColor redColor];
         [xButton addTarget:self action:@selector(cancelButtonClick:) forControlEvents:UIControlEventTouchUpInside];
-        [self addSubview:xButton];
+        [_bgView addSubview:xButton];
         
-        xButton.x = self.widthOfView - xButton.widthOfView + _xButtonPositionInsets.right;
+        xButton.x = _bgView.widthOfView - xButton.widthOfView + _xButtonPositionInsets.right;
         xButton.y = -_xButtonPositionInsets.top;
     }
 }
@@ -242,7 +279,7 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
     if (_textField == nil) {
         WFAlertViewTextField *textField = [WFAlertViewTextField new];
         CGFloat textFieldY = [self messageMaxY] + kMargin;
-        textField.frame = CGRectMake(_marginInsets.left, textFieldY, self.widthOfView - _marginInsets.left - _marginInsets.right, _textFieldHeight);
+        textField.frame = CGRectMake(_marginInsets.left, textFieldY, _bgView.widthOfView - _marginInsets.left - _marginInsets.right, _textFieldHeight);
         textField.layer.borderWidth = _textFieldBorderWidth;
         textField.layer.borderColor = [_textFieldBorderColor CGColor];
         textField.placeholder = _textFieldMessage;
@@ -254,7 +291,7 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
          textField.returnKeyType = UIReturnKeyDone;
          textField.delegate = self;
         _textField = textField;
-        [self addSubview:textField];
+        [_bgView addSubview:textField];
         
         if (![_textField isFirstResponder]) {
             [_textField becomeFirstResponder];
@@ -277,27 +314,24 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
 {
     if (_titleLabel == nil && title.length) {
         
-        
-        
-        
         UILabel *titleLabel = [UILabel new];
         titleLabel.text = title;
         titleLabel.font = _titleFont;
         titleLabel.textColor = _titleColor;
-        CGRect titleRect = [title boundingRectWithSize:CGSizeMake(self.widthOfView - _marginInsets.left - _marginInsets.right, MAXFLOAT) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName : _titleFont} context:0];
+        CGRect titleRect = [title boundingRectWithSize:CGSizeMake(_bgView.widthOfView - _marginInsets.left - _marginInsets.right, MAXFLOAT) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName : _titleFont} context:0];
         titleLabel.frame = titleRect;
-        titleLabel.centerX = self.frame.size.width/2;
+        titleLabel.centerX = _bgView.centerX;
         titleLabel.y = _marginInsets.top;
         
         if (_showTitleBG) {
             UIView *titleView = [UIView new];
-            [self addSubview:titleView];
+            [_bgView addSubview:titleView];
             titleView.backgroundColor = _titleBGViewColor;
-            titleView.frame = CGRectMake(0, 0, self.widthOfView, 0);
+            titleView.frame = CGRectMake(0, 0, _bgView.widthOfView, 0);
             
             UIView *line = [UIView new];
             line.backgroundColor = kTitleBGLineColor;
-            line.frame = CGRectMake(0, 0, self.widthOfView, 0.5);
+            line.frame = CGRectMake(0, 0, _bgView.widthOfView, 0.5);
             [titleView addSubview:line];
             
             titleView.heightOfView = titleRect.size.height + _marginInsets.top + _title2messageMargin;
@@ -305,7 +339,7 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
         }
         
             _titleLabel = titleLabel;
-        [self addSubview:titleLabel];
+        [_bgView addSubview:titleLabel];
     }
 }
 
@@ -321,9 +355,9 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
         messageLabel.numberOfLines = 0;
         messageLabel.lineBreakMode = NSLineBreakByWordWrapping;
         messageLabel.textAlignment = _messageTextAlignment;
-        CGRect messageRect = [message boundingRectWithSize:CGSizeMake(self.widthOfView - _marginInsets.left - _marginInsets.right, MAXFLOAT) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName : _messageFont} context:0];
-        messageLabel.frame = CGRectMake(_marginInsets.left, 0, self.widthOfView - _marginInsets.left - _marginInsets.right, messageRect.size.height);
-        messageLabel.centerX = self.frame.size.width/2;
+        CGRect messageRect = [message boundingRectWithSize:CGSizeMake(_bgView.widthOfView - _marginInsets.left - _marginInsets.right, MAXFLOAT) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName : _messageFont} context:0];
+        messageLabel.frame = CGRectMake(_marginInsets.left, 0, _bgView.widthOfView - _marginInsets.left - _marginInsets.right, messageRect.size.height);
+        messageLabel.centerX = _bgView.centerX;
         
         if (_titleLabel == nil) {
             messageLabel.y = _marginInsets.top;
@@ -336,7 +370,7 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
         }
         
         _messageLabel = messageLabel;
-        [self addSubview:messageLabel];
+        [_bgView addSubview:messageLabel];
     }
 }
 
@@ -394,12 +428,13 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
         cancelButton.titleLabel.font = _cancelButtonFont;
         [cancelButton addTarget:self action:@selector(cancelButtonClick:) forControlEvents:UIControlEventTouchUpInside];
         _cancelButton = cancelButton;
-        [self addSubview:cancelButton];
+        [_bgView addSubview:cancelButton];
         
         CGFloat buttonY = [self messageMaxY] + _message2ButtonMargin;
         NSLog(@"%f",[self messageMaxY]);
         NSLog(@"%f",buttonY);
-        cancelButton.frame = CGRectMake(_marginInsets.left, buttonY, self.widthOfView - _marginInsets.left - _marginInsets.right, _buttonHeight);
+        NSLog(@"%f",_bgView.widthOfView);
+        cancelButton.frame = CGRectMake(_marginInsets.left, buttonY, _bgView.widthOfView - _marginInsets.left - _marginInsets.right, _buttonHeight);
     }
 }
 
@@ -425,7 +460,7 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
             [otherButton setTitle:otherTitle forState:UIControlStateNormal];
             [otherButton addTarget:self action:@selector(otherButtonClick:) forControlEvents:UIControlEventTouchUpInside];
             [_otherButtons addObject:otherButton];
-            [self addSubview:otherButton];
+            [_bgView addSubview:otherButton];
             if (i == _otherButtonTitles.count - 1) {
                 _lastButton = otherButton;
             }
@@ -438,14 +473,14 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
                 
                 if (_cancelButton && _otherButtonTitles.count == 1) {
                     //水平排列
-                    CGFloat buttonW = (self.widthOfView - _marginInsets.left - _marginInsets.right - _buttonHorizontalMargin)/2;
+                    CGFloat buttonW = (_bgView.widthOfView - _marginInsets.left - _marginInsets.right - _buttonHorizontalMargin)/2;
                     CGFloat rightX = _marginInsets.left + buttonW + _buttonHorizontalMargin;
                     _cancelButton.frame = CGRectMake(_marginInsets.left, _cancelButton.y, buttonW, _buttonHeight);
                     otherButton.frame = CGRectMake(rightX, _cancelButton.y, buttonW, _buttonHeight);
                     
                 }else if (_cancelButton == nil && _otherButtonTitles.count == 2) {
                     //水平排列
-                    CGFloat buttonW = (self.widthOfView - _marginInsets.left - _marginInsets.right - _buttonHorizontalMargin)/2;
+                    CGFloat buttonW = (_bgView.widthOfView - _marginInsets.left - _marginInsets.right - _buttonHorizontalMargin)/2;
                     CGFloat buttonX = _marginInsets.left + i*(buttonW + _buttonHorizontalMargin);
                     CGFloat buttonY = [self messageMaxY] + _message2ButtonMargin;
                     otherButton.frame = CGRectMake(buttonX, buttonY, buttonW, _buttonHeight);
@@ -461,11 +496,11 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
                 if (_cancelButtonTitle) {
                     buttonY = [self messageMaxY] + _message2ButtonMargin + i*(_buttonVerticalMargin + _buttonHeight);
                     CGFloat cancelButtonY = buttonY + (_buttonVerticalMargin + _buttonHeight);
-                    _cancelButton.frame = CGRectMake(_marginInsets.left, cancelButtonY, self.widthOfView - _marginInsets.left - _marginInsets.right, _buttonHeight);
+                    _cancelButton.frame = CGRectMake(_marginInsets.left, cancelButtonY, _bgView.widthOfView - _marginInsets.left - _marginInsets.right, _buttonHeight);
                 }else {
                     buttonY = [self messageMaxY] + _message2ButtonMargin + i*(_buttonVerticalMargin + _buttonHeight);
                 }
-                otherButton.frame = CGRectMake(_marginInsets.left, buttonY, self.widthOfView - _marginInsets.left - _marginInsets.right, _buttonHeight);
+                otherButton.frame = CGRectMake(_marginInsets.left, buttonY, _bgView.widthOfView - _marginInsets.left - _marginInsets.right, _buttonHeight);
             }
         }
     }
@@ -513,10 +548,10 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
             height = [self messageMaxY];
         }
     }
-    self.heightOfView =  height + _marginInsets.bottom;
-    self.widthOfView = _alertViewWidth;
+    _bgView.heightOfView =  height + _marginInsets.bottom;
+    _bgView.widthOfView = _alertViewWidth;
     
-    self.center = _window.center;
+    _bgView.center = _window.center;
 }
 
 
@@ -532,35 +567,70 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
         UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(hideKeyboard)];
         [cover addGestureRecognizer:tap];
         _cover = cover;
+        
+        [_window addSubview:_cover];
     }
     return _cover;
 }
 
-- (void)dealloc
+
+
+
+- (UIView *)bgView
 {
-    [[NSNotificationCenter defaultCenter]removeObserver:self];
+    if (_bgView == nil) {
+        UIView *view = [UIView new];
+        view.layer.cornerRadius = _viewCornerRadius;
+        view.backgroundColor = _backgroundViewColor;
+        view.frame = CGRectMake(0, 0, _alertViewWidth, _alertViewWidth);
+        [_window addSubview:view];
+        _bgView = view;
+        
+        
+        
+        [self setupTitle:_title];
+
+        [self setupMessage:_message];
+        
+        if (self.type == WFAlertViewTypeTextField) {
+            [self addTextField];
+        }
+
+        [self setupButton];
+        
+        [self setupXButton];
+
+        [self adjustViewHeight];
+        
+    }
+    return _bgView;
 }
 
 - (void)show
 {
     UIWindow *window = [[[UIApplication sharedApplication] delegate] window];
-    [window addSubview:self.cover];
-    [window addSubview:self];
-    _window = window;
+    if (iOS8) {
+        self.window = window;
+    }else {
+        AGWindowView *windowView = [[AGWindowView alloc] initAndAddToKeyWindow];
+        self.window = windowView;
+    }
+    _windowMax = MAX(window.widthOfView, window.heightOfView);
+    _windowMin = MIN(window.widthOfView, window.heightOfView);
     
-    self.center = window.center;
-    self.alpha = 0;
-    self.transform = CGAffineTransformMakeScale(1.2, 1.2);
-    
+    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(willRotate:) name:UIApplicationWillChangeStatusBarOrientationNotification  object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(hideKeyboard) name:UIApplicationDidEnterBackgroundNotification object:nil];
     
+    self.cover.alpha = 0;
+    self.bgView.alpha = 0;
+    self.bgView.transform = CGAffineTransformMakeScale(1.2, 1.2);
     UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(hideKeyboard)];
-    [self addGestureRecognizer:tap];
+    [self.bgView addGestureRecognizer:tap];
     
    [UIView animateWithDuration:_animationDuration delay:0 usingSpringWithDamping:_animationSpringLevel initialSpringVelocity:0 options:UIViewAnimationOptionTransitionNone animations:^{
        self.cover.alpha = 0.5f;
-       self.alpha = 1.0f;
-       self.transform = CGAffineTransformMakeScale(1, 1);
+       self.bgView.alpha = 1.0f;
+       self.bgView.transform = CGAffineTransformMakeScale(1, 1);
    } completion:^(BOOL finished) {
        
    }];
@@ -571,12 +641,21 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
     [self hideKeyboard];
     
     [UIView animateWithDuration:_animationDuration/1.5 animations:^{
-        self.cover.alpha = 0;
-        self.alpha = 0;
-        self.transform = CGAffineTransformMakeScale(0, 0);
+        _cover.alpha = 0;
+        _bgView.alpha = 0;
+//        _bgView.transform = CGAffineTransformMakeScale(1.2, 1.2);
     } completion:^(BOOL finished) {
-        [self.cover removeFromSuperview];
-        [self removeFromSuperview];
+        [_cover removeFromSuperview];
+        [_bgView removeFromSuperview];
+        [_otherButtons removeAllObjects];
+        _otherButtons = nil;
+        [[NSNotificationCenter defaultCenter]removeObserver:self];
+        
+        if (iOS8) {
+            
+        }else {
+            [self.window removeFromSuperview];
+        }
     }];
 }
 
@@ -584,6 +663,26 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
 {
     [_textField resignFirstResponder];
 }
+
+
+
+- (void)willRotate:(NSNotification *)notification
+{
+    if (iOS8) {
+    }else {
+        UIApplication *app = notification.object;
+        if (!UIInterfaceOrientationIsLandscape(app.statusBarOrientation)) {
+            _window.widthOfView = _windowMax;
+            _window.heightOfView = _windowMin;
+        }else {
+            _window.widthOfView = _windowMin;
+            _window.heightOfView = _windowMax;
+        }
+    }
+    
+    _bgView.center = _window.center;
+}
+
 @end
 
 
@@ -610,108 +709,5 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
 
 @end
 
-
-
-
-
-
-//Tool
-@implementation UIView (WFAlertView)
-- (void)setX:(CGFloat)x
-{
-    CGRect frame = self.frame;
-    frame.origin.x = x;
-    self.frame = frame;
-}
-
-- (CGFloat)x
-{
-    return self.frame.origin.x;
-}
-
-- (void)setY:(CGFloat)y
-{
-    CGRect frame = self.frame;
-    frame.origin.y = y;
-    self.frame = frame;
-}
-
-- (CGFloat)y
-{
-    return self.frame.origin.y;
-}
-
-- (void)setWidthOfView:(CGFloat)widthOfView
-{
-    CGRect frame = self.frame;
-    frame.size.width = widthOfView;
-    self.frame = frame;
-}
-
-- (CGFloat)widthOfView
-{
-    return self.frame.size.width;
-}
-
-- (void)setHeightOfView:(CGFloat)heightOfView
-{
-    CGRect frame = self.frame;
-    frame.size.height = heightOfView;
-    self.frame = frame;
-}
-
-- (CGFloat)heightOfView
-{
-    return self.frame.size.height;
-}
-
-- (void)setSize:(CGSize)size
-{
-    CGRect frame = self.frame;
-    frame.size = size;
-    self.frame = frame;
-}
-
-- (CGSize)size
-{
-    return self.frame.size;
-}
-
-- (void)setOrigin:(CGPoint)origin
-{
-    CGRect frame = self.frame;
-    frame.origin = origin;
-    self.frame = frame;
-}
-
-- (CGPoint)origin
-{
-    return self.frame.origin;
-}
-
-- (CGFloat)centerX
-{
-    return self.center.x;
-}
-
-- (void)setCenterX:(CGFloat)centerX
-{
-    CGPoint center = self.center;
-    center.x = centerX;
-    self.center = center;
-}
-
-- (CGFloat)centerY
-{
-    return self.center.y;
-}
-
-- (void)setCenterY:(CGFloat)centerY
-{
-    CGPoint center = self.center;
-    center.y = centerY;
-    self.center = center;
-}
-@end
 
 
