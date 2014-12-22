@@ -17,8 +17,6 @@
 
 - (IBAction)showAlertView:(id)sender {
     
-
-//    [WFAlertView showAlertWithTitle:@"ggg" message:@"gagag" cancelButtonTitle:@"gg" otherButtonTitles:@[@"gg"] cancelButtonBlock:nil otherButtonBlock:nil];
     [WFAlertView showAlertWithTitle:@"title" message:nil textFieldMessage:@"text" textFieldValue:nil cancelButtonTitle:@"cancel" otherButtonTitles:nil cancelButtonBlock:nil textFieldBlock:nil];
 }
 

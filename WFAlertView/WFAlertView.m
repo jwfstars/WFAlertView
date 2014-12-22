@@ -52,8 +52,8 @@
 #define kAlertViewWidth 300
 #define kAlertViewHeight 200
 
-#define kViewCornerRadius 1
-#define kButtonCornerRadius 1
+#define kViewCornerRadius 2.5
+#define kButtonCornerRadius 2.5
 #define kButtonHeight 45
 
 
