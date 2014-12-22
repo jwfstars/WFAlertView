@@ -71,7 +71,7 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
 };
 
 @class WFAlertViewTextField;
-@interface WFAlertView()
+@interface WFAlertView()<UITextFieldDelegate>
 
 @property (copy, nonatomic) WFAlertViewCancelBlock cancelButtonBlock;
 @property (copy, nonatomic) WFAlertViewOtherBlock otherButtonBlock;
@@ -126,6 +126,16 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
         [self setupDefaultUIProperty];
     }
     return self;
+}
+- (instancetype)initWithTitle:(NSString *)title message:(NSString *)message textFieldMessage:(NSString *)textFieldMessage textFieldValue:(NSString *)textFieldValue cancelButtonTitle:(NSString *)cancelButtonTitle otherButtonTitles:(NSArray *)otherButtonTitles cancelButtonBlock:(WFAlertViewCancelBlock)cancelButtonBlock textFieldBlock:(WFAlertViewTextFieldBlock)textFieldBlock
+{
+    _textFieldBlock = textFieldBlock;
+    _type = WFAlertViewTypeTextField;
+    
+    _textFieldMessage = textFieldMessage;
+    _textFieldValue = textFieldValue;
+    
+    return [self initWithTitle:title message:message cancelButtonTitle:cancelButtonTitle otherButtonTitles:otherButtonTitles cancelButtonBlock:cancelButtonBlock otherButtonBlock:nil];
 }
 
 - (void)setupDefaultUIProperty
@@ -182,16 +192,6 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
     _bottomMargin = margin.bottom;
 }
 
-- (instancetype)initWithTitle:(NSString *)title message:(NSString *)message textFieldMessage:(NSString *)textFieldMessage textFieldValue:(NSString *)textFieldValue cancelButtonTitle:(NSString *)cancelButtonTitle otherButtonTitles:(NSArray *)otherButtonTitles cancelButtonBlock:(WFAlertViewCancelBlock)cancelButtonBlock textFieldBlock:(WFAlertViewTextFieldBlock)textFieldBlock
-{
-    _textFieldBlock = textFieldBlock;
-    _type = WFAlertViewTypeTextField;
-    
-    _textFieldMessage = textFieldMessage;
-    _textFieldValue = textFieldValue;
-    
-    return [self initWithTitle:title message:message cancelButtonTitle:cancelButtonTitle otherButtonTitles:otherButtonTitles cancelButtonBlock:cancelButtonBlock otherButtonBlock:nil];
-}
 
 //- (void)setTintColor:(UIColor *)tintColor{}
 
@@ -251,11 +251,27 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
         textField.textColor = _textFieldTextColor;
         textField.textContainerInset = UIEdgeInsetsMake(0, kTextFieldLeftInset, 0, 0);
         textField.leftView.backgroundColor = [UIColor redColor];
+         textField.returnKeyType = UIReturnKeyDone;
+         textField.delegate = self;
         _textField = textField;
         [self addSubview:textField];
+        
+        if (![_textField isFirstResponder]) {
+            [_textField becomeFirstResponder];
+        }
+        
+//        [textField setSelectedTextRange:[_textField textRangeFromPosition:_textField.beginningOfDocument toPosition:_textField.endOfDocument]];
     }
 }
 
+#pragma mark - UITextFiledDelegate
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    
+    [self otherButtonClick:nil];
+    
+    return YES;
+}
 
 - (void)setupTitle:(NSString *)title
 {
@@ -327,14 +343,28 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
 
 - (CGFloat)messageMaxY
 {
-    if (_titleLabel == nil) {
-        return CGRectGetMaxY(_messageLabel.frame);
-    }else if (_messageLabel == nil) {
-        return CGRectGetMaxY(_titleLabel.frame);
-    }else if (_textField == nil) {
-        return CGRectGetMaxY(_messageLabel.frame);
+    if (_type == WFAlertViewTypeNormal) {
+        if (_titleLabel == nil) {
+            return CGRectGetMaxY(_messageLabel.frame);
+        }else if (_messageLabel == nil) {
+            return CGRectGetMaxY(_titleLabel.frame);
+        }else if (_textField == nil) {
+            return CGRectGetMaxY(_messageLabel.frame);
+        }else {
+            return CGRectGetMaxY(_textField.frame);
+        }
     }else {
-        return CGRectGetMaxY(_textField.frame);
+        if (_textField == nil) {
+            if (_titleLabel == nil) {
+                return CGRectGetMaxY(_messageLabel.frame);
+            }else if (_messageLabel == nil) {
+                return CGRectGetMaxY(_titleLabel.frame);
+            }else {
+                return CGRectGetMaxY(_messageLabel.frame);
+            }
+        }else {
+            return CGRectGetMaxY(_textField.frame);
+        }
     }
 }
 
@@ -367,6 +397,8 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
         [self addSubview:cancelButton];
         
         CGFloat buttonY = [self messageMaxY] + _message2ButtonMargin;
+        NSLog(@"%f",[self messageMaxY]);
+        NSLog(@"%f",buttonY);
         cancelButton.frame = CGRectMake(_marginInsets.left, buttonY, self.widthOfView - _marginInsets.left - _marginInsets.right, _buttonHeight);
     }
 }
@@ -536,6 +568,8 @@ typedef NS_ENUM(NSInteger, WFAlertViewType)
 
 - (void)hide
 {
+    [self hideKeyboard];
+    
     [UIView animateWithDuration:_animationDuration/1.5 animations:^{
         self.cover.alpha = 0;
         self.alpha = 0;
