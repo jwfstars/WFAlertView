@@ -10,7 +10,7 @@
 #import "UIView+WF.h"
 
 #import "AGWindowView.h"
-
+#define DeviceScale [UIScreen mainScreen].scale
 #define iPad (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 #define iOS8 [[[UIDevice currentDevice]systemVersion] floatValue] >= 8.0
 
@@ -52,8 +52,8 @@
 #define kAlertViewWidth 300
 #define kAlertViewHeight 200
 
-#define kViewCornerRadius 2.5
-#define kButtonCornerRadius 2.5
+#define kViewCornerRadius 5.0/DeviceScale
+#define kButtonCornerRadius 5.0/DeviceScale
 #define kButtonHeight 45
 
 
@@ -146,7 +146,32 @@ static WFAlertView *sharedInstance;
 }
 
 
+- (instancetype)initWithTitle:(NSString *)title message:(NSString *)message cancelButtonTitle:(NSString *)cancelButtonTitle otherButtonTitles:(NSArray *)otherButtonTitles cancelButtonBlock:(WFAlertViewCancelBlock)cancelButtonBlock otherButtonBlock:(WFAlertViewOtherBlock)otherButtonBlock
+{
+    NSAssert(title != nil || message != nil, @"Title or message must be non-nil");
+    if (self = [super init]) {
+        self.title = title;
+        self.message = message;
+        
+        NSAssert(cancelButtonTitle != nil || otherButtonTitles.count, @"Alert view must have a button");
+        self.cancelButtonTitle = cancelButtonTitle;
+        self.otherButtonTitles = otherButtonTitles;
+        self.cancelButtonBlock = cancelButtonBlock;
+        self.otherButtonBlock = otherButtonBlock;
+    }
+    return self;
+}
 
+- (instancetype)initWithTitle:(NSString *)title message:(NSString *)message textFieldMessage:(NSString *)textFieldMessage textFieldValue:(NSString *)textFieldValue cancelButtonTitle:(NSString *)cancelButtonTitle otherButtonTitles:(NSArray *)otherButtonTitles cancelButtonBlock:(WFAlertViewCancelBlock)cancelButtonBlock textFieldBlock:(WFAlertViewTextFieldBlock)textFieldBlock
+{
+    _textFieldBlock = textFieldBlock;
+    _type = WFAlertViewTypeTextField;
+    
+    _textFieldMessage = textFieldMessage;
+    _textFieldValue = textFieldValue;
+    
+    return [self initWithTitle:title message:message cancelButtonTitle:cancelButtonTitle otherButtonTitles:otherButtonTitles cancelButtonBlock:cancelButtonBlock otherButtonBlock:nil];
+}
 
 
 + (void)showAlertWithTitle:(NSString *)title message:(NSString *)message cancelButtonTitle:(NSString *)cancelButtonTitle otherButtonTitles:(NSArray *)otherButtonTitles cancelButtonBlock:(WFAlertViewCancelBlock)cancelButtonBlock otherButtonBlock:(WFAlertViewOtherBlock)otherButtonBlock
@@ -172,7 +197,7 @@ static WFAlertView *sharedInstance;
 + (void)showAlertWithTitle:(NSString *)title message:(NSString *)message textFieldMessage:(NSString *)textFieldMessage textFieldValue:(NSString *)textFieldValue cancelButtonTitle:(NSString *)cancelButtonTitle otherButtonTitles:(NSArray *)otherButtonTitles cancelButtonBlock:(WFAlertViewCancelBlock)cancelButtonBlock textFieldBlock:(WFAlertViewTextFieldBlock)textFieldBlock
 {
     WFAlertView *alertView = [WFAlertView alertView];
-
+    
     NSAssert(title != nil || message != nil, @"Title or message must be non-nil");
     alertView.title = title;
     alertView.message = message;
@@ -187,7 +212,7 @@ static WFAlertView *sharedInstance;
     
     alertView.textFieldMessage = textFieldMessage;
     alertView.textFieldValue = textFieldValue;
-
+    
     [alertView show];
 }
 
@@ -223,7 +248,7 @@ static WFAlertView *sharedInstance;
     _buttonHeight = kButtonHeight;
     
     _messageTextAlignment = NSTextAlignmentCenter;
-
+    
     _viewCornerRadius = kViewCornerRadius;
     _buttonCornerRadius = kButtonCornerRadius;
     
@@ -234,7 +259,7 @@ static WFAlertView *sharedInstance;
     _buttonVerticalMargin = kMargin;
     
     
-
+    
 }
 
 
@@ -247,14 +272,6 @@ static WFAlertView *sharedInstance;
     _topMargin = margin.top;
     _bottomMargin = margin.bottom;
 }
-
-
-
-- (void)layoutSubviews
-{
-    
-}
-
 
 
 - (void)setupXButton
@@ -288,8 +305,8 @@ static WFAlertView *sharedInstance;
         textField.textColor = _textFieldTextColor;
         textField.textContainerInset = UIEdgeInsetsMake(0, kTextFieldLeftInset, 0, 0);
         textField.leftView.backgroundColor = [UIColor redColor];
-         textField.returnKeyType = UIReturnKeyDone;
-         textField.delegate = self;
+        textField.returnKeyType = UIReturnKeyDone;
+        textField.delegate = self;
         _textField = textField;
         [_bgView addSubview:textField];
         
@@ -297,7 +314,7 @@ static WFAlertView *sharedInstance;
             [_textField becomeFirstResponder];
         }
         
-//        [textField setSelectedTextRange:[_textField textRangeFromPosition:_textField.beginningOfDocument toPosition:_textField.endOfDocument]];
+        //        [textField setSelectedTextRange:[_textField textRangeFromPosition:_textField.beginningOfDocument toPosition:_textField.endOfDocument]];
     }
 }
 
@@ -338,7 +355,7 @@ static WFAlertView *sharedInstance;
             line.y = titleView.size.height - 0.5;
         }
         
-            _titleLabel = titleLabel;
+        _titleLabel = titleLabel;
         [_bgView addSubview:titleLabel];
     }
 }
@@ -412,7 +429,7 @@ static WFAlertView *sharedInstance;
     if (_otherButtonTitles.count == 0) {
         //return
     }else {
-       [self addOtherButton];
+        [self addOtherButton];
     }
 }
 
@@ -421,10 +438,13 @@ static WFAlertView *sharedInstance;
 {
     if (_cancelButton == nil) {
         UIButton *cancelButton = [UIButton new];
+        cancelButton.imageEdgeInsets = UIEdgeInsetsMake(0, -20, 0, 0);
+        cancelButton.adjustsImageWhenHighlighted = NO;
         cancelButton.backgroundColor = _cancelButtonColor;
         cancelButton.tag = -1;
         cancelButton.layer.cornerRadius = _buttonCornerRadius;
         [cancelButton setTitle:_cancelButtonTitle forState:UIControlStateNormal];
+        [cancelButton setImage:_cancelButtonImage forState:UIControlStateNormal];
         cancelButton.titleLabel.font = _cancelButtonFont;
         [cancelButton addTarget:self action:@selector(cancelButtonClick:) forControlEvents:UIControlEventTouchUpInside];
         _cancelButton = cancelButton;
@@ -445,7 +465,7 @@ static WFAlertView *sharedInstance;
     if (_otherButtons == nil) {
         _otherButtons = [NSMutableArray arrayWithCapacity:_otherButtonTitles.count];
     }
-
+    
     if (_otherButtons.count == 0) {
         
         for (int i=0; i<_otherButtonTitles.count; i++) {
@@ -453,11 +473,14 @@ static WFAlertView *sharedInstance;
             NSString *otherTitle = _otherButtonTitles[i];
             
             UIButton *otherButton = [UIButton new];
+            otherButton.imageEdgeInsets = UIEdgeInsetsMake(0, -20, 0, 0);
+            otherButton.adjustsImageWhenHighlighted = NO;
             otherButton.backgroundColor = _otherButtonColor;
             otherButton.titleLabel.font = _otherButtonFont;
             otherButton.layer.cornerRadius = _buttonCornerRadius;
             otherButton.tag = i;
             [otherButton setTitle:otherTitle forState:UIControlStateNormal];
+            [otherButton setImage:_otherButtonImage forState:UIControlStateNormal];
             [otherButton addTarget:self action:@selector(otherButtonClick:) forControlEvents:UIControlEventTouchUpInside];
             [_otherButtons addObject:otherButton];
             [_bgView addSubview:otherButton];
@@ -566,6 +589,12 @@ static WFAlertView *sharedInstance;
         cover.alpha = 0.0;
         UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(hideKeyboard)];
         [cover addGestureRecognizer:tap];
+        
+        if (_canTouchCoverToDismiss) {
+            UITapGestureRecognizer *hide = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(hide)];
+            [cover addGestureRecognizer:hide];
+        }
+        
         _cover = cover;
         
         [_window addSubview:_cover];
@@ -589,17 +618,17 @@ static WFAlertView *sharedInstance;
         
         
         [self setupTitle:_title];
-
+        
         [self setupMessage:_message];
         
         if (self.type == WFAlertViewTypeTextField) {
             [self addTextField];
         }
-
+        
         [self setupButton];
         
         [self setupXButton];
-
+        
         [self adjustViewHeight];
         
     }
@@ -621,19 +650,21 @@ static WFAlertView *sharedInstance;
     [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(willRotate:) name:UIApplicationWillChangeStatusBarOrientationNotification  object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(hideKeyboard) name:UIApplicationDidEnterBackgroundNotification object:nil];
     
+    
+    
     self.cover.alpha = 0;
     self.bgView.alpha = 0;
     self.bgView.transform = CGAffineTransformMakeScale(1.2, 1.2);
     UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(hideKeyboard)];
     [self.bgView addGestureRecognizer:tap];
     
-   [UIView animateWithDuration:_animationDuration delay:0 usingSpringWithDamping:_animationSpringLevel initialSpringVelocity:0 options:UIViewAnimationOptionTransitionNone animations:^{
-       self.cover.alpha = 0.5f;
-       self.bgView.alpha = 1.0f;
-       self.bgView.transform = CGAffineTransformMakeScale(1, 1);
-   } completion:^(BOOL finished) {
-       
-   }];
+    [UIView animateWithDuration:_animationDuration delay:0 usingSpringWithDamping:_animationSpringLevel initialSpringVelocity:0 options:UIViewAnimationOptionTransitionNone animations:^{
+        self.cover.alpha = 0.5f;
+        self.bgView.alpha = 1.0f;
+        self.bgView.transform = CGAffineTransformMakeScale(1, 1);
+    } completion:^(BOOL finished) {
+        
+    }];
 }
 
 - (void)hide
@@ -643,7 +674,7 @@ static WFAlertView *sharedInstance;
     [UIView animateWithDuration:_animationDuration/1.5 animations:^{
         _cover.alpha = 0;
         _bgView.alpha = 0;
-//        _bgView.transform = CGAffineTransformMakeScale(1.2, 1.2);
+        //        _bgView.transform = CGAffineTransformMakeScale(1.2, 1.2);
     } completion:^(BOOL finished) {
         [_cover removeFromSuperview];
         [_bgView removeFromSuperview];

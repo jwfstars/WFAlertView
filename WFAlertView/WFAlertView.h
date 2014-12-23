@@ -72,24 +72,33 @@ typedef NS_ENUM(NSInteger, WFAlertViewButtonType)
 @property (assign, nonatomic) CGFloat buttonVerticalMargin;
 @property (assign, nonatomic) CGFloat buttonHorizontalMargin;
 
+//image
+@property (strong, nonatomic) UIImage *cancelButtonImage;
+@property (strong, nonatomic) UIImage *otherButtonImage;
+
+//control
+@property (assign, nonatomic) BOOL canTouchCoverToDismiss;
+
+
+
 
 + (WFAlertView *)appearence;
 
 + (void)showAlertWithTitle:(NSString *)title
-               message:(NSString *)message
-     cancelButtonTitle:(NSString *)cancelButtonTitle
-     otherButtonTitles:( NSArray *)otherButtonTitles
-     cancelButtonBlock:(WFAlertViewCancelBlock)cancelButtonBlock
-      otherButtonBlock:(WFAlertViewOtherBlock)otherButtonBlock;
+                   message:(NSString *)message
+         cancelButtonTitle:(NSString *)cancelButtonTitle
+         otherButtonTitles:( NSArray *)otherButtonTitles
+         cancelButtonBlock:(WFAlertViewCancelBlock)cancelButtonBlock
+          otherButtonBlock:(WFAlertViewOtherBlock)otherButtonBlock;
 
 + (void)showAlertWithTitle:(NSString *)title
-              message:(NSString *)message
-     textFieldMessage:(NSString *)textFieldMessage
-       textFieldValue:(NSString *)textFieldValue
-    cancelButtonTitle:(NSString *)cancelButtonTitle
-    otherButtonTitles:( NSArray *)otherButtonTitles
-    cancelButtonBlock:(WFAlertViewCancelBlock)cancelButtonBlock
-       textFieldBlock:(WFAlertViewTextFieldBlock)textFieldBlock;
+                   message:(NSString *)message
+          textFieldMessage:(NSString *)textFieldMessage
+            textFieldValue:(NSString *)textFieldValue
+         cancelButtonTitle:(NSString *)cancelButtonTitle
+         otherButtonTitles:( NSArray *)otherButtonTitles
+         cancelButtonBlock:(WFAlertViewCancelBlock)cancelButtonBlock
+            textFieldBlock:(WFAlertViewTextFieldBlock)textFieldBlock;
 
 @end
 
