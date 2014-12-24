@@ -187,7 +187,7 @@ static WFAlertView *sharedInstance;
     alertView.otherButtonTitles = otherButtonTitles;
     alertView.cancelButtonBlock = cancelButtonBlock;
     alertView.otherButtonBlock = otherButtonBlock;
-    
+    alertView.type = WFAlertViewTypeNormal;
     
     [alertView show];
 }
@@ -532,26 +532,34 @@ static WFAlertView *sharedInstance;
 
 - (void)otherButtonClick:(UIButton *)sender
 {
-    if (_otherButtonBlock) {
-        _otherButtonBlock(sender.tag);
-        [self hide];
-        return;
-    }
+    [self hideComplete:^{
+        if (_otherButtonBlock) {
+            _otherButtonBlock(sender.tag);
+            _otherButtonBlock = nil;
+            return;
+        }
+        
+        if (_textFieldBlock) {
+            _textFieldBlock(_textField);
+            _textFieldBlock = nil;
+        }
+    }];
     
-    if (_textFieldBlock) {
-        _textFieldBlock(_textField);
-    }
-    [self hide];
+    
+    
 }
 
 
 - (void)cancelButtonClick:(UIButton *)sender
 {
-    if (_cancelButtonBlock) {
-        _cancelButtonBlock();
-    }
+    [self hideComplete:^{
+        if (_cancelButtonBlock) {
+            _cancelButtonBlock();
+            _cancelButtonBlock = nil;
+        }
+    }];
     
-    [self hide];
+    
 }
 
 
@@ -667,7 +675,7 @@ static WFAlertView *sharedInstance;
     }];
 }
 
-- (void)hide
+- (void)hideComplete:(void(^)())complete
 {
     [self hideKeyboard];
     
@@ -678,14 +686,25 @@ static WFAlertView *sharedInstance;
     } completion:^(BOOL finished) {
         [_cover removeFromSuperview];
         [_bgView removeFromSuperview];
-        [_otherButtons removeAllObjects];
+        _bgView = nil;
+        _cover = nil;
         _otherButtons = nil;
+        _titleLabel = nil;
+        _cancelButton = nil;
+        _textField = nil;
+        _messageLabel = nil;
+        [_otherButtons removeAllObjects];
+        
         [[NSNotificationCenter defaultCenter]removeObserver:self];
         
         if (iOS8) {
             
         }else {
             [self.window removeFromSuperview];
+        }
+        
+        if (complete) {
+            complete();
         }
     }];
 }

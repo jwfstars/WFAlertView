@@ -17,7 +17,19 @@
 
 - (IBAction)showAlertView:(id)sender {
     
-    [WFAlertView showAlertWithTitle:@"title" message:nil textFieldMessage:@"text" textFieldValue:nil cancelButtonTitle:@"cancel" otherButtonTitles:nil cancelButtonBlock:nil textFieldBlock:nil];
+    [WFAlertView showAlertWithTitle:@"title" message:@"message" textFieldMessage:nil textFieldValue:nil cancelButtonTitle:@"cancel" otherButtonTitles:@[@"OK"] cancelButtonBlock:^{
+        
+    } textFieldBlock:^(UITextField *textField) {
+        
+        
+        NSLog(@"ok");
+        
+        [WFAlertView showAlertWithTitle:@"title" message:@"ggggg" cancelButtonTitle:@"cancel" otherButtonTitles:@[@"jjgajg"] cancelButtonBlock:^{
+            
+        } otherButtonBlock:^(NSInteger buttonIndex) {
+            
+        }];
+    }];
 }
 
 
