@@ -451,9 +451,9 @@ static WFAlertView *sharedInstance;
         [_bgView addSubview:cancelButton];
         
         CGFloat buttonY = [self messageMaxY] + _message2ButtonMargin;
-        NSLog(@"%f",[self messageMaxY]);
-        NSLog(@"%f",buttonY);
-        NSLog(@"%f",_bgView.widthOfView);
+//        NSLog(@"%f",[self messageMaxY]);
+//        NSLog(@"%f",buttonY);
+//        NSLog(@"%f",_bgView.widthOfView);
         cancelButton.frame = CGRectMake(_marginInsets.left, buttonY, _bgView.widthOfView - _marginInsets.left - _marginInsets.right, _buttonHeight);
     }
 }
